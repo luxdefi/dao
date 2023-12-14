@@ -1,4 +1,4 @@
-# Lux DAO Governance Suite
+# LUX DAO Governance Suite
 
 ## Contents
 
