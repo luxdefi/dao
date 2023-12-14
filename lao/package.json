@@ -1,0 +1,20 @@
+{
+  "name": "@luxdefi/dao/lao",
+  "version": "0.1.0",
+  "description": "LAO Documentation",
+  "private": true,
+  "main": "index.js",
+  "scripts": {
+    "docs:dev": "vuepress dev docs",
+    "docs:build": "vuepress build docs",
+    "style:fix": "prettier --write '**/*.{js,md}'",
+    "style": "prettier --check '**/*.{js,md}'"
+  },
+  "author": "OpenLaw Team <opensource@openlaw.io>",
+  "license": "CC-BY-4.0",
+  "devDependencies": {
+    "prettier": "^2.1.2",
+    "vuepress": "^1.7.1",
+    "vuepress-theme-default-prefers-color-scheme": "^1.1.2"
+  }
+}

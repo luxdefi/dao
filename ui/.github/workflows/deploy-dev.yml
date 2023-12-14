@@ -1,0 +1,60 @@
+name: GitHub Pages development deployment
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy-dev:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Setup node
+        uses: actions/setup-node@v2
+        with:
+          node-version: 14.x
+
+      - name: Cache node modules
+        id: cache-node-modules
+        uses: actions/cache@v2
+        with:
+          path: node_modules
+          key: node-modules_deploy-dev-${{ hashFiles('package-lock.json') }}
+
+      - name: Setup SSH to install dependencies
+        if: steps.cache-node-modules.outputs.cache-hit != 'true'
+        uses: webfactory/ssh-agent@v0.5.0
+        with:
+          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+
+      - name: Install dependencies
+        if: steps.cache-node-modules.outputs.cache-hit != 'true'
+        run: npm ci
+
+      - name: Create production build
+        env:
+          REACT_APP_ENVIRONMENT: development
+          REACT_APP_INFURA_PROJECT_ID_DEV: ${{ secrets.REACT_APP_INFURA_PROJECT_ID_DEV }}
+          REACT_APP_DAO_REGISTRY_CONTRACT_ADDRESS: "0xF5C3EC4Af6212e11cA4D1A4e189A989A753C8fBd"
+          REACT_APP_MULTICALL_CONTRACT_ADDRESS: "0xc2FBEb9dEE044Fc16EE5e5498c79988bAcf6E6fF"
+          REACT_APP_SNAPSHOT_HUB_API_URL: https://snapshot-hub-erc712.dev.thelao.io
+          REACT_APP_COUPON_API_URL: https://coupon.dev.openlaw.io
+          REACT_APP_SNAPSHOT_SPACE: tribute
+          REACT_APP_GRAPH_CORE_URL: https://api.thegraph.com/subgraphs/name/openlawteam/tribute-core-dev
+          REACT_APP_ENABLE_KYC_ONBOARDING: false
+          REACT_APP_KYC_BACKEND_URL: https://kyc-backend.dev.thelao.io/kyc-certificate
+          # @todo use generalized development Tribute KYC site (needs to be created)
+          REACT_APP_KYC_FORMS_URL: ""
+        run: npm run build
+
+      - name: Deploy to GitHub Pages site
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./build
+          commit_message: ${{ github.event.head_commit.message }}
+          cname: demo.tributedao.com
